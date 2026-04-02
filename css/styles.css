@@ -544,10 +544,13 @@ h3 {
 .section--gallery {
   background: linear-gradient(180deg, var(--bg) 0%, rgba(12, 12, 18, 0.98) 50%, var(--bg) 100%);
 }
+.section--gallery .section__head {
+  margin-bottom: 2rem;
+}
 
-/* Gallery carousel */
+/* Gallery carousel — compact frame so images are not upscaled (avoids pixelation) */
 .gallery-carousel {
-  max-width: 56rem;
+  max-width: 36rem;
   margin: 0 auto;
 }
 .gallery-carousel__chrome {
@@ -575,29 +578,34 @@ h3 {
 }
 .gallery-carousel__viewport {
   position: relative;
-  border-radius: 1rem;
+  border-radius: 0.75rem;
   border: 1px solid var(--border);
   background: #0a0a0c;
   overflow: hidden;
-  min-height: min(58vh, 28rem);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+  min-height: 10rem;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
 }
 .gallery-carousel__figure {
   margin: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
-  min-height: min(58vh, 28rem);
+  padding: 0.65rem 0.75rem;
+  min-height: 0;
 }
 .gallery-carousel__figure img {
   max-width: 100%;
   width: auto;
   height: auto;
-  max-height: min(62vh, 32rem);
+  max-height: clamp(10rem, 32vw, 17.5rem);
   object-fit: contain;
   display: block;
   border-radius: 0.35rem;
+}
+@media (min-width: 640px) {
+  .gallery-carousel__figure img {
+    max-height: 18.5rem;
+  }
 }
 .gallery-carousel__btn {
   display: inline-flex;
