@@ -105,24 +105,34 @@
     filmVideos.forEach(wirePreview);
   }
 
-  /* Gallery carousel — auto-advance with pause on hover / reduced motion */
+  /* Gallery: single img in the DOM; JS swaps src/alt so slides never stack */
+  var gallerySlides = [
+    { src: "images/gallery/slide-01.png", alt: "Promotional poster for the Film and TV Masterclass in KwaZulu-Natal, featuring official presenters.", w: 1200, h: 1600 },
+    { src: "images/gallery/slide-02.png", alt: "Film crew on location beside a pool with boom microphone and cinema camera.", w: 1600, h: 1067 },
+    { src: "images/gallery/slide-03.png", alt: "Colleagues celebrating at a dinner in a warm, wood-paneled restaurant.", w: 1200, h: 1600 },
+    { src: "images/gallery/slide-04.png", alt: "Group photo outdoors at the Nelson Mandela Capture Site sculpture in KZN.", w: 1600, h: 900 },
+    { src: "images/gallery/slide-05.png", alt: "Team collaborating indoors with headphones during an audio session.", w: 1600, h: 1200 },
+    { src: "images/gallery/slide-06.png", alt: "Group of colleagues posing cheerfully outside a hotel entrance at dusk.", w: 1600, h: 900 },
+    { src: "images/gallery/slide-07.png", alt: "Two people on a rural bridge overlooking green hills and mountains.", w: 1600, h: 900 },
+    { src: "images/gallery/slide-08.png", alt: "Two giraffes on a grassy ridge silhouetted against a bright blue sky.", w: 1200, h: 1600 },
+    { src: "images/gallery/slide-09.png", alt: "On-location security and crew in high-visibility vests in a grassy field.", w: 1600, h: 900 },
+    { src: "images/gallery/slide-10.png", alt: "Travel group posing outside a hotel entrance in late-afternoon light.", w: 1600, h: 900 },
+    { src: "images/gallery/slide-11.png", alt: "Team photo on a cobbled plaza in front of a glass-fronted building.", w: 1600, h: 900 },
+    { src: "images/gallery/slide-12.png", alt: "Behind the scenes: boom operator and camera on tripod in a grassy, wooded area.", w: 1600, h: 900 },
+    { src: "images/gallery/slide-13.png", alt: "Wide shot of a film set in a field with scrims, tent, and crew.", w: 1600, h: 900 },
+    { src: "images/gallery/slide-14.png", alt: "Four cast or crew members standing in long grass, looking toward the horizon.", w: 1600, h: 900 },
+    { src: "images/gallery/slide-15.png", alt: "Large diverse group smiling together outdoors in front of evergreen trees.", w: 1600, h: 900 }
+  ];
+
   var carouselRoot = document.querySelector("[data-carousel]");
-  if (carouselRoot) {
-    var track = carouselRoot.querySelector("[data-carousel-track]");
+  var carouselImg = document.querySelector("[data-carousel-img]");
+  if (carouselRoot && carouselImg) {
     var prevBtn = carouselRoot.querySelector("[data-carousel-prev]");
     var nextBtn = carouselRoot.querySelector("[data-carousel-next]");
     var dotsWrap = carouselRoot.querySelector("[data-carousel-dots]");
     var live = carouselRoot.querySelector("[data-carousel-live]");
-    var slides = track ? track.querySelectorAll(".gallery-carousel__slide") : [];
-    var n = slides.length;
+    var n = gallerySlides.length;
     var index = 0;
-
-    if (track && n) {
-      track.style.width = n * 100 + "%";
-      slides.forEach(function (slide) {
-        slide.style.flex = "0 0 " + 100 / n + "%";
-      });
-    }
     var timer = null;
     var intervalMs = 5500;
 
@@ -146,10 +156,15 @@
     }
 
     function goTo(i) {
-      if (!track || n === 0) return;
+      if (n === 0) return;
       index = ((i % n) + n) % n;
-      /* Percent is relative to track width (n × viewport); each slide is 100/n of the track */
-      track.style.transform = "translateX(-" + (index * 100) / n + "%)";
+      var s = gallerySlides[index];
+      if (s) {
+        carouselImg.src = s.src;
+        carouselImg.alt = s.alt;
+        if (s.w) carouselImg.width = s.w;
+        if (s.h) carouselImg.height = s.h;
+      }
       setStatus();
       updateDots();
     }
@@ -176,18 +191,20 @@
     }
 
     if (dotsWrap && n) {
-      slides.forEach(function (_slide, i) {
-        var dot = document.createElement("button");
-        dot.type = "button";
-        dot.className = "gallery-carousel__dot";
-        dot.setAttribute("role", "tab");
-        dot.setAttribute("aria-label", "Go to slide " + (i + 1));
-        dot.addEventListener("click", function () {
-          goTo(i);
-          startTimer();
-        });
-        dotsWrap.appendChild(dot);
-      });
+      for (var di = 0; di < n; di++) {
+        (function (i) {
+          var dot = document.createElement("button");
+          dot.type = "button";
+          dot.className = "gallery-carousel__dot";
+          dot.setAttribute("role", "tab");
+          dot.setAttribute("aria-label", "Go to slide " + (i + 1));
+          dot.addEventListener("click", function () {
+            goTo(i);
+            startTimer();
+          });
+          dotsWrap.appendChild(dot);
+        })(di);
+      }
     }
 
     goTo(0);
