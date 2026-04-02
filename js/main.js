@@ -105,6 +105,112 @@
     filmVideos.forEach(wirePreview);
   }
 
+  /* Gallery carousel — auto-advance with pause on hover / reduced motion */
+  var carouselRoot = document.querySelector("[data-carousel]");
+  if (carouselRoot) {
+    var track = carouselRoot.querySelector("[data-carousel-track]");
+    var prevBtn = carouselRoot.querySelector("[data-carousel-prev]");
+    var nextBtn = carouselRoot.querySelector("[data-carousel-next]");
+    var dotsWrap = carouselRoot.querySelector("[data-carousel-dots]");
+    var live = carouselRoot.querySelector("[data-carousel-live]");
+    var slides = track ? track.querySelectorAll(".gallery-carousel__slide") : [];
+    var n = slides.length;
+    var index = 0;
+
+    if (track && n) {
+      track.style.width = n * 100 + "%";
+      slides.forEach(function (slide) {
+        slide.style.flex = "0 0 " + 100 / n + "%";
+      });
+    }
+    var timer = null;
+    var intervalMs = 5500;
+
+    var reduceMotionGallery =
+      window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    function setStatus() {
+      if (!live) return;
+      live.textContent = "Slide " + (index + 1) + " of " + n;
+    }
+
+    function updateDots() {
+      if (!dotsWrap) return;
+      var btns = dotsWrap.querySelectorAll(".gallery-carousel__dot");
+      btns.forEach(function (b, i) {
+        var on = i === index;
+        b.classList.toggle("is-active", on);
+        b.setAttribute("aria-selected", on ? "true" : "false");
+        b.tabIndex = on ? 0 : -1;
+      });
+    }
+
+    function goTo(i) {
+      if (!track || n === 0) return;
+      index = ((i % n) + n) % n;
+      /* Percent is relative to track width (n × viewport); each slide is 100/n of the track */
+      track.style.transform = "translateX(-" + (index * 100) / n + "%)";
+      setStatus();
+      updateDots();
+    }
+
+    function next() {
+      goTo(index + 1);
+    }
+
+    function prev() {
+      goTo(index - 1);
+    }
+
+    function stopTimer() {
+      if (timer) {
+        clearInterval(timer);
+        timer = null;
+      }
+    }
+
+    function startTimer() {
+      stopTimer();
+      if (reduceMotionGallery || n < 2) return;
+      timer = window.setInterval(next, intervalMs);
+    }
+
+    if (dotsWrap && n) {
+      slides.forEach(function (_slide, i) {
+        var dot = document.createElement("button");
+        dot.type = "button";
+        dot.className = "gallery-carousel__dot";
+        dot.setAttribute("role", "tab");
+        dot.setAttribute("aria-label", "Go to slide " + (i + 1));
+        dot.addEventListener("click", function () {
+          goTo(i);
+          startTimer();
+        });
+        dotsWrap.appendChild(dot);
+      });
+    }
+
+    goTo(0);
+
+    if (prevBtn) prevBtn.addEventListener("click", function () {
+      prev();
+      startTimer();
+    });
+    if (nextBtn) nextBtn.addEventListener("click", function () {
+      next();
+      startTimer();
+    });
+
+    carouselRoot.addEventListener("mouseenter", stopTimer);
+    carouselRoot.addEventListener("mouseleave", startTimer);
+    carouselRoot.addEventListener("focusin", stopTimer);
+    carouselRoot.addEventListener("focusout", function (e) {
+      if (!carouselRoot.contains(e.relatedTarget)) startTimer();
+    });
+
+    startTimer();
+  }
+
   /* Contact form: static demo — swap action for Formspare / backend */
   var form = document.querySelector("[data-contact-form]");
   if (form) {
